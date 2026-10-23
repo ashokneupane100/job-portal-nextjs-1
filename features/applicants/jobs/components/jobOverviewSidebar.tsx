@@ -1,0 +1,153 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { JobDetailsType } from "@/features/employers/jobs/server/jobs.queries";
+import {
+  Briefcase,
+  Banknote,
+  GraduationCap,
+  Globe,
+  CalendarDays,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
+interface JobSidebarProps {
+  job: NonNullable<JobDetailsType>;
+  // "NonNullable" tells TS: "Trust me, job is not undefined here"
+}
+
+const JobOverviewSidebar = ({ job }: JobSidebarProps) => {
+  // Helper for Salary
+  const salaryDisplay =
+    job.minSalary && job.maxSalary
+      ? `${job.salaryCurrency} ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}`
+      : "Not Disclosed";
+
+  return (
+    <div>
+      <div className="space-y-6">
+        {/* Job Overview Card */}
+        <Card>
+          <CardHeader className="bg-gray-50/50 pb-4">
+            <CardTitle className="text-lg">Job Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5 pt-6">
+            <OverviewItem
+              icon={<Banknote className="h-5 w-5 text-gray-500" />}
+              label="Salary"
+              value={salaryDisplay}
+            />
+
+            <OverviewItem
+              icon={<Briefcase className="h-5 w-5 text-gray-500" />}
+              label="Job Type"
+              value={job.jobType?.replace("-", " ")}
+            />
+
+            <OverviewItem
+              icon={<CalendarDays className="h-5 w-5 text-gray-500" />}
+              label="Work Type"
+              value={job.workType?.replace("-", " ")}
+            />
+
+            <OverviewItem
+              icon={<GraduationCap className="h-5 w-5 text-gray-500" />}
+              label="Experience Level"
+              value={job.jobLevel?.replace("-", " ")}
+            />
+
+            <OverviewItem
+              icon={<GraduationCap className="h-5 w-5 text-gray-500" />}
+              label="Education"
+              value={job.minEducation?.replace("-", " ")}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Company Snippet Card */}
+        <Card className="overflow-hidden">
+          {job.companyBanner && (
+            <div className="relative h-24 w-full bg-gray-100 border-b">
+              <Image
+                src={job.companyBanner}
+                alt={job.companyName || "Company Banner"}
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-3">
+              {job.companyLogo && (
+                <div className="relative h-12 w-12 rounded-lg border bg-white overflow-hidden shrink-0">
+                  <Image
+                    src={job.companyLogo}
+                    alt={job.companyName || "Company Logo"}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <div>
+                <CardTitle className="text-base">
+                  {job.companyName || "About the Company"}
+                </CardTitle>
+                {job.companyLocation && (
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {job.companyLocation}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div
+              className="text-sm text-gray-600 line-clamp-5 prose prose-sm"
+              dangerouslySetInnerHTML={{
+                __html: job.companyBio || "No company description available.",
+              }}
+            />
+
+            {job.companyWebsite && (
+              <Link
+                href={job.companyWebsite}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit company website (opens in new tab)"
+                className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline"
+              >
+                <Globe className="h-4 w-4" />
+                Visit Website
+              </Link>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default JobOverviewSidebar;
+
+// --- Helper Component for Sidebar Items ---
+function OverviewItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | null | undefined;
+}) {
+  if (!value) return null;
+  return (
+    <div className="flex items-start gap-3">
+      <div className="mt-1">{icon}</div>
+      <div>
+        <p className="text-xs font-medium text-gray-500 uppercase">{label}</p>
+        <p className="text-sm font-semibold text-gray-900 capitalize">
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
